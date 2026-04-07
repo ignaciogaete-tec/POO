@@ -53,6 +53,7 @@ public class Personaje
         this.ataque = ataque;
         this.equipo = null;
     }
+   
     //----------------------- GETERS
     public string GetNombre() => nombre;
 

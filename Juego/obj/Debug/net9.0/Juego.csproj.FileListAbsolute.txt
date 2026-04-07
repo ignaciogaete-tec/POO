@@ -1,0 +1,15 @@
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\bin\Debug\net9.0\Juego.exe
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\bin\Debug\net9.0\Juego.deps.json
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\bin\Debug\net9.0\Juego.runtimeconfig.json
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\bin\Debug\net9.0\Juego.dll
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\bin\Debug\net9.0\Juego.pdb
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.GeneratedMSBuildEditorConfig.editorconfig
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.AssemblyInfoInputs.cache
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.AssemblyInfo.cs
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.csproj.CoreCompileInputs.cache
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.sourcelink.json
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.dll
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\refint\Juego.dll
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.pdb
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\Juego.genruntimeconfig.cache
+C:\desarrollo\ASIGNATURAS\REDGIT\POO\juego\obj\Debug\net9.0\ref\Juego.dll
