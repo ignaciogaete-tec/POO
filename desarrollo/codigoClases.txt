@@ -1,0 +1,65 @@
+classDiagram
+    class Juego {
+        + Main()
+        + Batalla(Personaje p1, Personaje p2)
+    }
+
+    class Personaje {
+        - string nombre
+        - int vida
+        - int ataque
+        - Equipo equipo
+
+        + Personaje(string nombre, int vida, int ataque)
+        + string getNombre()
+        + int getVida()
+        + int getAtaque()
+        + int getArmadura()
+        + void atacar(Personaje objetivo)
+        + void recibirDanio(int danio)
+        + void equipar(Equipo equipo)
+    }
+
+    class Barbaro {
+        - int furia
+
+        + Barbaro(string nombre, int vida, int ataque, int furia)
+        + void Atacar(Personaje objetivo)
+    }
+
+    class Sacerdote {
+        + Sacerdote(string nombre, int vida, int ataque)
+
+        + void recibirDanio(int danio)
+    }
+
+    class Equipo {
+        - int modificadorAtaque
+        - int modificadorArmadura
+
+        + Equipo(int modificadorAtaque, int modificadorArmadura)
+        + int getModificadorAtaque()
+        + int getModificadorArmadura()
+    }
+
+    class Arma {
+        + Arma(int modificadorAtaque)
+    }
+
+    class Armadura {
+        + Armadura(int modificadorArmadura)
+    }
+
+    class PersonajeAdicional {
+
+    }
+
+    Personaje <|-- Barbaro
+    Personaje <|-- Sacerdote
+    Personaje <|-- PersonajeAdicional
+    Equipo <|-- Arma
+    Equipo <|-- Armadura
+
+    Personaje o-- Equipo
+    Juego *-- Personaje
+    Juego *-- Equipo

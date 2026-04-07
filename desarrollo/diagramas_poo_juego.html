@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<title>Diagramas POO — Juego</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#21262d;
+  --border:#30363d;--border2:#444c56;
+  --txt:#e6edf3;--txt2:#8b949e;--txt3:#484f58;
+  --green:#2ea043;--greentx:#56d364;--greenlt:#0d2010;
+  --blue:#388bfd;--bluetx:#79c0ff;--bluelt:#0e1e40;
+  --amber:#bb8009;--ambertx:#e3b341;--amberlt:#221800;
+  --orange:#d1711c;--orangetx:#f0a060;--orangelt:#1e1000;
+  --purple:#8957e5;--purpletx:#bc8cff;--purplelt:#160b2e;
+  --red:#da3633;--redtx:#ff7b72;--redlt:#3d0f0f;
+  --teal:#1a7f64;--tealtx:#3fb950;
+  --r:7px;--r2:12px;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--txt);font-family:'Inter',sans-serif;overflow:hidden}
+/* ── TAB BAR ── */
+#bar{position:fixed;top:0;left:0;right:0;height:48px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:stretch;padding:0 16px;gap:4px;z-index:50}
+#bar h1{font-size:11px;color:var(--greentx);font-family:'JetBrains Mono',monospace;font-weight:700;align-self:center;margin-right:12px;white-space:nowrap}
+.tab{padding:0 16px;border:none;background:none;color:var(--txt2);font-size:11px;font-family:'JetBrains Mono',monospace;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;white-space:nowrap}
+.tab:hover{color:var(--txt);background:var(--bg3)}
+.tab.active{color:var(--greentx);border-bottom-color:var(--green)}
+/* ── CONTENT ── */
+#content{position:fixed;top:48px;left:0;right:0;bottom:0;overflow:hidden}
+.panel{display:none;width:100%;height:100%;overflow:auto;padding:24px}
+.panel.active{display:block}
+/* ── COMMON SVG WRAPPER ── */
+.diagram-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:auto;padding:16px;min-height:400px}
+.diagram-wrap svg{display:block;margin:0 auto}
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;padding:10px 14px;background:var(--bg3);border-radius:var(--r);border:1px solid var(--border)}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt2);font-family:'JetBrains Mono',monospace}
+.ld{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+.lline{width:22px;height:2px;border-radius:1px;flex-shrink:0}
+/* ── TITLES ── */
+h2{font-size:13px;font-family:'JetBrains Mono',monospace;color:var(--greentx);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+h2 span{font-size:10px;color:var(--txt3);font-weight:400}
+p.desc{font-size:11px;color:var(--txt2);line-height:1.6;margin-bottom:14px;max-width:900px}
+/* ── UML CLASS TABLE ── */
+.uml-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.uml-box{border-radius:var(--r);border:1px solid var(--border2);overflow:hidden;font-family:'JetBrains Mono',monospace;font-size:10px}
+.uml-head{padding:7px 10px;font-weight:700;font-size:11px;text-align:center;letter-spacing:.03em}
+.uml-section{padding:4px 10px;border-top:1px solid var(--border);line-height:1.7}
+.uml-section.attrs{background:var(--bg)}
+.uml-section.meths{background:var(--bg2)}
+.uml-row{display:flex;gap:4px;align-items:baseline}
+.uml-vis{color:var(--txt3);width:10px;flex-shrink:0}
+.uml-name{color:var(--bluetx)}
+.uml-type{color:var(--ambertx)}
+.uml-ret{color:var(--greentx)}
+.uml-override{color:var(--redtx)}
+/* ── ACTIVITY ── */
+.act-note{font-size:9.5px;color:var(--txt3);font-family:'JetBrains Mono',monospace;margin-top:8px;padding:6px 10px;background:var(--bg3);border-left:2px solid var(--border2);border-radius:0 var(--r) var(--r) 0}
+</style>
+</head>
+<body>
+<div id="bar">
+  <h1>🎮 POO · Juego</h1>
+  <button class="tab active" onclick="show(0,this)">① Contexto</button>
+  <button class="tab" onclick="show(1,this)">② E-R Extendido</button>
+  <button class="tab" onclick="show(2,this)">③ Clases UML</button>
+  <button class="tab" onclick="show(3,this)">④ Actividades</button>
+  <button class="tab" onclick="show(4,this)">⑤ Secuencia</button>
+  <button class="tab" onclick="show(5,this)">⑥ Estados</button>
+</div>
+<div id="content">
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 0 — DIAGRAMA DE CONTEXTO
+════════════════════════════════════════════════════════ -->
+<div class="panel active" id="p0">
+<h2>① Diagrama de Contexto <span>— sistema y actores externos</span></h2>
+<p class="desc">Muestra el sistema "Juego" como caja negra y todos los actores/entidades que interactúan con él. No muestra lógica interna, solo flujos de información.</p>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:#388bfd;border:1px solid #58a6ff"></div>Sistema central</div>
+  <div class="li"><div class="ld" style="background:#0d2010;border:1px solid #2ea043"></div>Actor / Entidad externa</div>
+  <div class="li"><div class="lline" style="background:#56d364"></div>Flujo entrada</div>
+  <div class="li"><div class="lline" style="background:#f0a060"></div>Flujo salida</div>
+  <div class="li"><div class="lline" style="background:#bc8cff;background:repeating-linear-gradient(90deg,#bc8cff 0,#bc8cff 5px,transparent 5px,transparent 10px)"></div>Flujo bidireccional</div>
+</div>
+<div class="diagram-wrap">
+<svg width="860" height="520" viewBox="0 0 860 520" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+<defs>
+  <marker id="g-arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#56d364"/></marker>
+  <marker id="o-arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#f0a060"/></marker>
+  <marker id="p-arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#bc8cff"/></marker>
+  <marker id="p-arr2" markerWidth="8" markerHeight="8" refX="1" refY="4" orient="auto"><polygon points="8 0,0 4,8 8" fill="#bc8cff"/></marker>
+</defs>
+<!-- Sistema central -->
+<rect x="300" y="190" width="260" height="130" rx="14" fill="#0e1e40" stroke="#388bfd" stroke-width="2"/>
+<text x="430" y="240" text-anchor="middle" fill="#79c0ff" font-size="15" font-weight="700">JUEGO</text>
+<text x="430" y="260" text-anchor="middle" fill="#58a6ff" font-size="10">Sistema de Batalla POO</text>
+<text x="430" y="278" text-anchor="middle" fill="#484f58" font-size="9">C# · .NET · Consola</text>
+<text x="430" y="296" text-anchor="middle" fill="#484f58" font-size="9">Main() · Batalla()</text>
+
+<!-- Actor: Usuario -->
+<ellipse cx="100" cy="255" rx="58" ry="30" fill="#0d1117" stroke="#2ea043" stroke-width="1.5"/>
+<text x="100" y="252" text-anchor="middle" fill="#56d364" font-size="10" font-weight="700">Usuario</text>
+<text x="100" y="265" text-anchor="middle" fill="#3fb950" font-size="8">del programa</text>
+<!-- Usuario → Juego -->
+<line x1="158" y1="248" x2="298" y2="248" stroke="#56d364" stroke-width="1.5" marker-end="url(#g-arr)"/>
+<text x="228" y="238" text-anchor="middle" fill="#3fb950" font-size="8.5">nombre, vida, ataque</text>
+<text x="228" y="250" text-anchor="middle" fill="#484f58" font-size="7.5">datos personaje adicional</text>
+<!-- Juego → Usuario -->
+<line x1="298" y1="268" x2="158" y2="268" stroke="#f0a060" stroke-width="1.5" marker-end="url(#o-arr)"/>
+<text x="228" y="282" text-anchor="middle" fill="#f0a060" font-size="8.5">resultado batalla</text>
+<text x="228" y="293" text-anchor="middle" fill="#484f58" font-size="7.5">ganador / empate</text>
+
+<!-- Actor: Consola -->
+<ellipse cx="760" cy="255" rx="62" ry="30" fill="#0d1117" stroke="#d29922" stroke-width="1.5"/>
+<text x="760" y="252" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">Consola</text>
+<text x="760" y="265" text-anchor="middle" fill="#d29922" font-size="8">stdout / stdin</text>
+<!-- Juego → Consola -->
+<line x1="562" y1="245" x2="696" y2="245" stroke="#f0a060" stroke-width="1.5" marker-end="url(#o-arr)"/>
+<text x="629" y="235" text-anchor="middle" fill="#f0a060" font-size="8.5">log rondas, ataques</text>
+<!-- Consola → Juego (stdin) -->
+<line x1="696" y1="265" x2="562" y2="265" stroke="#56d364" stroke-width="1.5" marker-end="url(#g-arr)"/>
+<text x="629" y="280" text-anchor="middle" fill="#3fb950" font-size="8.5">Console.ReadLine()</text>
+
+<!-- Actor: Personaje -->
+<rect x="330" y="30" width="200" height="50" rx="8" fill="#0d2010" stroke="#2ea043" stroke-width="1.2"/>
+<text x="430" y="52" text-anchor="middle" fill="#56d364" font-size="10" font-weight="700">Personajes</text>
+<text x="430" y="65" text-anchor="middle" fill="#3fb950" font-size="8">Bárbaro · Sacerdote · Adicional</text>
+<!-- Personaje ↔ Juego -->
+<line x1="430" y1="80" x2="430" y2="188" stroke="#bc8cff" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#p-arr)" marker-start="url(#p-arr2)"/>
+<text x="445" y="140" fill="#bc8cff" font-size="8.5">instanciados</text>
+<text x="445" y="152" fill="#484f58" font-size="7.5">/ interactúan</text>
+
+<!-- Actor: Equipo -->
+<rect x="580" y="30" width="160" height="50" rx="8" fill="#160b2e" stroke="#8957e5" stroke-width="1.2"/>
+<text x="660" y="52" text-anchor="middle" fill="#bc8cff" font-size="10" font-weight="700">Equipos</text>
+<text x="660" y="65" text-anchor="middle" fill="#9c73e3" font-size="8">Arma · Armadura</text>
+<!-- Equipo → Juego -->
+<path d="M660 80 Q660 150 562 200" fill="none" stroke="#bc8cff" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#p-arr)"/>
+<text x="650" y="148" fill="#8957e5" font-size="8">equipados</text>
+
+<!-- Actor: Clases hijas -->
+<rect x="120" y="380" width="160" height="50" rx="8" fill="#1e1000" stroke="#e07c2a" stroke-width="1.2"/>
+<text x="200" y="402" text-anchor="middle" fill="#f0a060" font-size="10" font-weight="700">Herencia</text>
+<text x="200" y="415" text-anchor="middle" fill="#e07c2a" font-size="8">override Atacar/RecibirDanio</text>
+<!-- Herencia → Juego -->
+<path d="M270 405 Q350 440 360 322" fill="none" stroke="#f0a060" stroke-width="1.3" stroke-dasharray="5,3" marker-end="url(#o-arr)"/>
+<text x="295" y="460" fill="#f0a060" font-size="8">polimorfismo</text>
+<text x="295" y="472" fill="#484f58" font-size="7.5">en tiempo ejecución</text>
+
+<!-- Actor: Batalla -->
+<rect x="580" y="390" width="160" height="50" rx="8" fill="#0d1117" stroke="#8b949e" stroke-width="1.2"/>
+<text x="660" y="412" text-anchor="middle" fill="#e0e0e0" font-size="10" font-weight="700">Método Batalla</text>
+<text x="660" y="425" text-anchor="middle" fill="#8b949e" font-size="8">static · rondas simultáneas</text>
+<!-- Batalla ↔ Juego -->
+<path d="M660 390 Q600 340 562 310" fill="none" stroke="#8b949e" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#p-arr)"/>
+<text x="640" y="358" fill="#8b949e" font-size="8">invocado</text>
+<text x="640" y="370" fill="#484f58" font-size="7.5">retorna ganador</text>
+</svg>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 1 — E-R EXTENDIDO
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="p1">
+<h2>② Diagrama E-R Extendido <span>— entidades, atributos y relaciones con cardinalidad</span></h2>
+<p class="desc">Modelo entidad-relación del dominio del juego. Muestra entidades fuertes (doble borde), atributos clave (subrayados), relaciones con cardinalidad y especialización/herencia.</p>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:#0d2010;border:2px solid #2ea043"></div>Entidad fuerte</div>
+  <div class="li"><div class="ld" style="background:#160b2e;border:1px dashed #8957e5"></div>Entidad débil</div>
+  <div class="li"><div class="ld" style="background:#221800;border:1px solid #d29922;border-radius:50%"></div>Atributo</div>
+  <div class="li"><div class="ld" style="background:#1e1000;border:1px solid #e07c2a;transform:rotate(45deg)"></div>Relación</div>
+  <div class="li"><div class="lline" style="background:#58a6ff"></div>ISA / herencia</div>
+  <div class="li"><div class="lline" style="background:#2ea043"></div>Relación</div>
+</div>
+<div class="diagram-wrap">
+<svg width="900" height="700" viewBox="0 0 900 700" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+<defs>
+  <marker id="arr-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#2ea043"/></marker>
+  <marker id="arr-bl" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#58a6ff"/></marker>
+  <marker id="arr-o" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#e07c2a"/></marker>
+</defs>
+
+<!-- ── PERSONAJE entidad fuerte ── -->
+<rect x="320" y="60" width="160" height="50" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2.5"/>
+<rect x="324" y="64" width="152" height="42" rx="4" fill="none" stroke="#2ea043" stroke-width="0.7"/>
+<text x="400" y="82" text-anchor="middle" fill="#56d364" font-size="12" font-weight="700">PERSONAJE</text>
+<text x="400" y="97" text-anchor="middle" fill="#3fb950" font-size="8">Clase base abstracta</text>
+
+<!-- Atributos de PERSONAJE -->
+<!-- nombre (clave) -->
+<ellipse cx="180" cy="55" rx="42" ry="18" fill="#221800" stroke="#d29922" stroke-width="1.2"/>
+<text x="180" y="51" text-anchor="middle" fill="#e3b341" font-size="9" text-decoration="underline">nombre</text>
+<text x="180" y="63" text-anchor="middle" fill="#d29922" font-size="7">PK · string</text>
+<line x1="222" y1="60" x2="320" y2="76" stroke="#d29922" stroke-width="0.8"/>
+<!-- vida -->
+<ellipse cx="240" cy="20" rx="35" ry="16" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="240" y="16" text-anchor="middle" fill="#e3b341" font-size="9">vida</text>
+<text x="240" y="27" text-anchor="middle" fill="#d29922" font-size="7">int ≥ 0</text>
+<line x1="264" y1="28" x2="350" y2="60" stroke="#d29922" stroke-width="0.8"/>
+<!-- ataque -->
+<ellipse cx="400" cy="20" rx="35" ry="16" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="400" y="16" text-anchor="middle" fill="#e3b341" font-size="9">ataque</text>
+<text x="400" y="27" text-anchor="middle" fill="#d29922" font-size="7">int</text>
+<line x1="400" y1="36" x2="400" y2="60" stroke="#d29922" stroke-width="0.8"/>
+<!-- tipo (derivado) -->
+<ellipse cx="550" cy="30" rx="40" ry="16" fill="#0d1117" stroke="#d29922" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="550" y="26" text-anchor="middle" fill="#bb8009" font-size="9">tipo</text>
+<text x="550" y="37" text-anchor="middle" fill="#7d6514" font-size="7">derivado</text>
+<line x1="527" y1="40" x2="460" y2="65" stroke="#d29922" stroke-width="0.8" stroke-dasharray="3,2"/>
+
+<!-- ── Relación EQUIPA ── -->
+<polygon points="400,160 440,190 400,220 360,190" fill="#1e1000" stroke="#e07c2a" stroke-width="1.5"/>
+<text x="400" y="187" text-anchor="middle" fill="#f0a060" font-size="10" font-weight="700">EQUIPA</text>
+<text x="400" y="200" text-anchor="middle" fill="#e07c2a" font-size="8">0..1</text>
+<line x1="400" y1="110" x2="400" y2="160" stroke="#2ea043" stroke-width="1.2"/>
+<text x="412" y="140" fill="#3fb950" font-size="9">1</text>
+<line x1="400" y1="220" x2="400" y2="290" stroke="#2ea043" stroke-width="1.2"/>
+<text x="412" y="260" fill="#3fb950" font-size="9">0..1</text>
+
+<!-- ── EQUIPO entidad fuerte ── -->
+<rect x="320" y="290" width="160" height="50" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2.5"/>
+<rect x="324" y="294" width="152" height="42" rx="4" fill="none" stroke="#2ea043" stroke-width="0.7"/>
+<text x="400" y="312" text-anchor="middle" fill="#56d364" font-size="12" font-weight="700">EQUIPO</text>
+<text x="400" y="327" text-anchor="middle" fill="#3fb950" font-size="8">Clase base</text>
+
+<!-- Atributos Equipo -->
+<ellipse cx="200" cy="320" rx="50" ry="17" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="200" y="316" text-anchor="middle" fill="#e3b341" font-size="8.5">modAtaque</text>
+<text x="200" y="327" text-anchor="middle" fill="#d29922" font-size="7">int ≥ 0</text>
+<line x1="250" y1="320" x2="320" y2="315" stroke="#d29922" stroke-width="0.8"/>
+<ellipse cx="600" cy="320" rx="54" ry="17" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="600" y="316" text-anchor="middle" fill="#e3b341" font-size="8.5">modArmadura</text>
+<text x="600" y="327" text-anchor="middle" fill="#d29922" font-size="7">int ≥ 0</text>
+<line x1="546" y1="320" x2="480" y2="315" stroke="#d29922" stroke-width="0.8"/>
+
+<!-- ── ISA Personaje (herencia) ── -->
+<!-- Triángulo ISA centrado -->
+<polygon points="400,430 370,470 430,470" fill="#0e1e40" stroke="#58a6ff" stroke-width="1.5"/>
+<text x="400" y="460" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="700">ISA</text>
+<line x1="400" y1="110" x2="400" y2="430" stroke="#58a6ff" stroke-width="1.2" stroke-dasharray="8,4" marker-end="url(#arr-bl)"/>
+
+<!-- Hijos de Personaje -->
+<!-- Bárbaro -->
+<rect x="70" y="520" width="140" height="55" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2"/>
+<text x="140" y="542" text-anchor="middle" fill="#56d364" font-size="11" font-weight="700">BÁRBARO</text>
+<text x="140" y="558" text-anchor="middle" fill="#3fb950" font-size="8">override Atacar()</text>
+<line x1="140" y1="520" x2="375" y2="470" stroke="#58a6ff" stroke-width="1.2"/>
+<!-- furia -->
+<ellipse cx="60" cy="460" rx="30" ry="15" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="60" y="456" text-anchor="middle" fill="#e3b341" font-size="8.5">furia</text>
+<text x="60" y="467" text-anchor="middle" fill="#d29922" font-size="7">int ≥ 0</text>
+<line x1="77" y1="465" x2="100" y2="533" stroke="#d29922" stroke-width="0.8"/>
+
+<!-- Sacerdote -->
+<rect x="320" y="520" width="160" height="55" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2"/>
+<text x="400" y="542" text-anchor="middle" fill="#56d364" font-size="11" font-weight="700">SACERDOTE</text>
+<text x="400" y="558" text-anchor="middle" fill="#3fb950" font-size="8">override RecibirDanio()</text>
+<line x1="400" y1="520" x2="400" y2="470" stroke="#58a6ff" stroke-width="1.2"/>
+<!-- bendición -->
+<ellipse cx="280" cy="600" rx="38" ry="16" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="280" y="596" text-anchor="middle" fill="#e3b341" font-size="8">bendición</text>
+<text x="280" y="607" text-anchor="middle" fill="#d29922" font-size="7">1/4 ataques</text>
+<line x1="310" y1="596" x2="350" y2="575" stroke="#d29922" stroke-width="0.8"/>
+
+<!-- PersonajeAdicional -->
+<rect x="580" y="520" width="160" height="55" rx="5" fill="#160b2e" stroke="#8957e5" stroke-width="2" stroke-dasharray="6,3"/>
+<text x="660" y="542" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="700">ADICIONAL</text>
+<text x="660" y="558" text-anchor="middle" fill="#9c73e3" font-size="8">habilidad especial</text>
+<line x1="600" y1="520" x2="425" y2="470" stroke="#58a6ff" stroke-width="1.2"/>
+<!-- habilidad -->
+<ellipse cx="740" cy="460" rx="38" ry="16" fill="#221800" stroke="#d29922" stroke-width="1" stroke-dasharray="4,2"/>
+<text x="740" y="456" text-anchor="middle" fill="#bb8009" font-size="8">habilidad</text>
+<text x="740" y="467" text-anchor="middle" fill="#7d6514" font-size="7">a definir</text>
+<line x1="718" y1="462" x2="698" y2="520" stroke="#d29922" stroke-width="0.8" stroke-dasharray="3,2"/>
+
+<!-- ── ISA Equipo ── -->
+<polygon points="680,360 660,395 700,395" fill="#0e1e40" stroke="#58a6ff" stroke-width="1.5"/>
+<text x="680" y="385" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="700">ISA</text>
+<line x1="480" y1="315" x2="680" y2="360" stroke="#58a6ff" stroke-width="1.2" stroke-dasharray="7,4" marker-end="url(#arr-bl)"/>
+<!-- Arma -->
+<rect x="580" y="410" width="90" height="45" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2"/>
+<text x="625" y="432" text-anchor="middle" fill="#56d364" font-size="11" font-weight="700">ARMA</text>
+<text x="625" y="445" text-anchor="middle" fill="#3fb950" font-size="7.5">modArm=0</text>
+<line x1="640" y1="410" x2="674" y2="395" stroke="#58a6ff" stroke-width="1.2"/>
+<!-- Armadura -->
+<rect x="700" y="410" width="100" height="45" rx="5" fill="#0d2010" stroke="#2ea043" stroke-width="2"/>
+<text x="750" y="432" text-anchor="middle" fill="#56d364" font-size="11" font-weight="700">ARMADURA</text>
+<text x="750" y="445" text-anchor="middle" fill="#3fb950" font-size="7.5">modAtk=0</text>
+<line x1="720" y1="410" x2="686" y2="395" stroke="#58a6ff" stroke-width="1.2"/>
+
+<!-- ── Relación BATALLA ── -->
+<polygon points="140,200 175,230 140,260 105,230" fill="#1e1000" stroke="#e07c2a" stroke-width="1.5"/>
+<text x="140" y="227" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="700">BATALLA</text>
+<text x="140" y="240" text-anchor="middle" fill="#e07c2a" font-size="7">rondas</text>
+<line x1="320" y1="85" x2="175" y2="220" stroke="#2ea043" stroke-width="1.2"/>
+<text x="253" y="143" fill="#3fb950" font-size="8.5">p1 (1)</text>
+<line x1="320" y1="96" x2="175" y2="240" stroke="#2ea043" stroke-width="1.2"/>
+<text x="238" y="165" fill="#3fb950" font-size="8.5">p2 (1)</text>
+<!-- rondas atributo relacion -->
+<ellipse cx="60" cy="205" rx="38" ry="15" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="60" y="201" text-anchor="middle" fill="#e3b341" font-size="8">rondas</text>
+<text x="60" y="212" text-anchor="middle" fill="#d29922" font-size="7">1..N</text>
+<line x1="98" y1="210" x2="105" y2="226" stroke="#d29922" stroke-width="0.8"/>
+</svg>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 2 — DIAGRAMA DE CLASES UML
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="p2">
+<h2>③ Diagrama de Clases UML <span>— notación estándar con visibilidad, tipos y relaciones</span></h2>
+<p class="desc">Diagrama de clases UML completo. + = public, - = private, # = protected. Los métodos virtuales se muestran en cursiva, los override en rojo.</p>
+<div class="uml-grid">
+
+<!-- Juego -->
+<div class="uml-box" style="border-color:#8b949e">
+  <div class="uml-head" style="background:#161b22;color:#e0e0e0">«class»<br>Juego</div>
+  <div class="uml-section attrs" style="border-color:#30363d"><em style="color:#484f58;font-size:9px">sin atributos</em></div>
+  <div class="uml-section meths" style="border-color:#30363d">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Main</span><span style="color:#484f58">()</span><span class="uml-ret">: void</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Batalla</span><span style="color:#484f58">(p1,p2: Personaje)</span><span class="uml-ret">: Personaje?</span></div>
+  </div>
+</div>
+
+<!-- Personaje -->
+<div class="uml-box" style="border-color:#2ea043;grid-column:span 2">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Personaje</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">nombre</span><span style="color:#484f58">: </span><span class="uml-type">string</span></div>
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">vida</span><span style="color:#484f58">: </span><span class="uml-type">int</span></div>
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">ataque</span><span style="color:#484f58">: </span><span class="uml-type">int</span></div>
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">equipo</span><span style="color:#484f58">: </span><span class="uml-type">Equipo?</span><span style="color:#484f58;font-size:8px"> = null</span></div>
+  </div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Personaje</span><span style="color:#484f58">(nombre: string, vida: int, ataque: int)</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getNombre</span><span style="color:#484f58">()</span><span class="uml-ret">: string</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getVida</span><span style="color:#484f58">()</span><span class="uml-ret">: int</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getAtaque</span><span style="color:#484f58">()</span><span class="uml-ret">: int</span><span style="color:#484f58;font-size:8px"> atk + modAtk</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getArmadura</span><span style="color:#484f58">()</span><span class="uml-ret">: int</span><span style="color:#484f58;font-size:8px"> 0 si sin equipo</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><em style="color:#79c0ff">Atacar</em><span style="color:#484f58">(objetivo: Personaje)</span><span class="uml-ret">: void</span><span style="color:#1f6feb;font-size:8px"> {virtual}</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><em style="color:#79c0ff">RecibirDanio</em><span style="color:#484f58">(danio: int)</span><span class="uml-ret">: void</span><span style="color:#1f6feb;font-size:8px"> {virtual}</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Equipar</span><span style="color:#484f58">(equipo: Equipo)</span><span class="uml-ret">: void</span></div>
+  </div>
+</div>
+
+<!-- Bárbaro -->
+<div class="uml-box" style="border-color:#2ea043">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Barbaro ▷ Personaje</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">furia</span><span style="color:#484f58">: </span><span class="uml-type">int</span><span style="color:#484f58;font-size:8px"> ≥ 0</span></div>
+  </div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Barbaro</span><span style="color:#484f58">(nom, vida, atk, furia)</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-override">«override»</span></div>
+    <div class="uml-row" style="padding-left:10px"><em style="color:#ff7b72">Atacar</em><span style="color:#484f58">(obj: Personaje)</span><span class="uml-ret">: void</span></div>
+    <div style="font-size:8px;color:#484f58;padding-left:10px">furia≥3 → ×1.15, furia-=3<br>sin furia → ×0.50</div>
+  </div>
+</div>
+
+<!-- Sacerdote -->
+<div class="uml-box" style="border-color:#2ea043">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Sacerdote ▷ Personaje</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f"><em style="color:#484f58;font-size:9px">sin atributos extra</em></div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Sacerdote</span><span style="color:#484f58">(nom, vida, atk)</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-override">«override»</span></div>
+    <div class="uml-row" style="padding-left:10px"><em style="color:#ff7b72">RecibirDanio</em><span style="color:#484f58">(danio: int)</span><span class="uml-ret">: void</span></div>
+    <div style="font-size:8px;color:#484f58;padding-left:10px">1 de 4 → danio/2<br>Imprime plegaria</div>
+  </div>
+</div>
+
+<!-- PersonajeAdicional -->
+<div class="uml-box" style="border-color:#8957e5">
+  <div class="uml-head" style="background:#160b2e;color:#bc8cff">«class»<br>PersonajeAdicional ▷ Personaje</div>
+  <div class="uml-section attrs" style="border-color:#2c1f5e"><em style="color:#8957e5;font-size:9px">atributo especial propio</em></div>
+  <div class="uml-section meths" style="border-color:#2c1f5e">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">PersonajeAdicional</span><span style="color:#484f58">(...)</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-override">«override»</span></div>
+    <div class="uml-row" style="padding-left:10px"><em style="color:#ff7b72">Atacar / RecibirDanio</em></div>
+    <div style="font-size:8px;color:#484f58;padding-left:10px">habilidad especial<br>(pícaro, paladín, bardo…)</div>
+  </div>
+</div>
+
+<!-- Equipo -->
+<div class="uml-box" style="border-color:#2ea043;grid-column:span 2">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Equipo</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">modificadorAtaque</span><span style="color:#484f58">: </span><span class="uml-type">int</span></div>
+    <div class="uml-row"><span class="uml-vis">-</span><span class="uml-name">modificadorArmadura</span><span style="color:#484f58">: </span><span class="uml-type">int</span></div>
+  </div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Equipo</span><span style="color:#484f58">(modAtk: int, modArm: int)</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getModificadorAtaque</span><span style="color:#484f58">()</span><span class="uml-ret">: int</span></div>
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">getModificadorArmadura</span><span style="color:#484f58">()</span><span class="uml-ret">: int</span></div>
+  </div>
+</div>
+
+<!-- Arma -->
+<div class="uml-box" style="border-color:#2ea043">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Arma ▷ Equipo</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f"><div style="font-size:8px;color:#484f58">modAtaque = param<br>modArmadura = 0</div></div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Arma</span><span style="color:#484f58">(modAtk: int)</span></div>
+  </div>
+</div>
+
+<!-- Armadura -->
+<div class="uml-box" style="border-color:#2ea043">
+  <div class="uml-head" style="background:#0d2010;color:#56d364">«class»<br>Armadura ▷ Equipo</div>
+  <div class="uml-section attrs" style="border-color:#1a3a1f"><div style="font-size:8px;color:#484f58">modAtaque = 0<br>modArmadura = param</div></div>
+  <div class="uml-section meths" style="border-color:#1a3a1f">
+    <div class="uml-row"><span class="uml-vis">+</span><span class="uml-name">Armadura</span><span style="color:#484f58">(modArm: int)</span></div>
+  </div>
+</div>
+
+</div><!-- uml-grid -->
+<!-- Relaciones -->
+<div style="margin-top:16px;padding:12px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:#8b949e;line-height:2">
+  <span style="color:#58a6ff">◁|—</span> Herencia (extends):  Barbaro, Sacerdote, PersonajeAdicional → Personaje &nbsp;|&nbsp; Arma, Armadura → Equipo<br>
+  <span style="color:#2ea043">◇——</span> Agregación (0..1):  Personaje o── Equipo &nbsp;(puede no tener equipo)<br>
+  <span style="color:#d29922">◆——</span> Composición:  Juego ──* Personaje &nbsp;|&nbsp; Juego ──* Equipo &nbsp;(Juego instancia y gestiona)<br>
+  <span style="color:#f85149">↺</span> Override:  Barbaro::Atacar &nbsp;|&nbsp; Sacerdote::RecibirDanio &nbsp;|&nbsp; PersonajeAdicional::(a definir)
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 3 — DIAGRAMA DE ACTIVIDADES
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="p3">
+<h2>④ Diagrama de Actividades <span>— flujo completo del programa con swimlanes</span></h2>
+<p class="desc">Flujo de ejecución desde Main() hasta el fin del programa. Swimlanes por responsable: Usuario, Juego (Main), Batalla, Personaje.</p>
+<div class="legend">
+  <div class="li"><div class="ld" style="background:#0e1e40;border:1px solid #388bfd;border-radius:50%"></div>Inicio/Fin</div>
+  <div class="li"><div class="ld" style="background:#21262d;border:1px solid #444c56"></div>Actividad</div>
+  <div class="li"><div class="ld" style="background:#221800;border:1px solid #d29922;transform:rotate(45deg)"></div>Decisión</div>
+  <div class="li"><div class="lline" style="height:1px;border-top:2px solid #8b949e"></div>Barra fork/join</div>
+</div>
+<div class="diagram-wrap" style="overflow-x:auto">
+<svg width="880" height="1080" viewBox="0 0 880 1080" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+<defs>
+  <marker id="act-arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#8b949e"/></marker>
+  <marker id="act-grn" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#56d364"/></marker>
+  <marker id="act-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#ff7b72"/></marker>
+  <marker id="act-amb" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#e3b341"/></marker>
+</defs>
+
+<!-- Swimlane headers -->
+<rect x="0" y="0" width="220" height="1080" fill="#0e1218" stroke="#30363d" stroke-width="0.5"/>
+<rect x="220" y="0" width="220" height="1080" fill="#0d1117" stroke="#30363d" stroke-width="0.5"/>
+<rect x="440" y="0" width="220" height="1080" fill="#0e1218" stroke="#30363d" stroke-width="0.5"/>
+<rect x="660" y="0" width="220" height="1080" fill="#0d1117" stroke="#30363d" stroke-width="0.5"/>
+<rect x="0" y="0" width="880" height="28" fill="#161b22"/>
+<text x="110" y="18" text-anchor="middle" fill="#e3b341" font-size="10" font-weight="700">👤 USUARIO</text>
+<text x="330" y="18" text-anchor="middle" fill="#79c0ff" font-size="10" font-weight="700">⚙ JUEGO / Main</text>
+<text x="550" y="18" text-anchor="middle" fill="#56d364" font-size="10" font-weight="700">⚔ BATALLA</text>
+<text x="770" y="18" text-anchor="middle" fill="#f0a060" font-size="10" font-weight="700">🧙 PERSONAJE</text>
+
+<!-- ── Inicio ── -->
+<circle cx="330" cy="60" r="12" fill="#388bfd" stroke="#79c0ff" stroke-width="1.5"/>
+<!-- crear personajes -->
+<rect x="240" y="88" width="180" height="34" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="330" y="102" text-anchor="middle" fill="#e6edf3" font-size="9" font-weight="600">Crear sacerdote, barbaro</text>
+<text x="330" y="114" text-anchor="middle" fill="#8b949e" font-size="8">new Sacerdote / new Barbaro</text>
+<line x1="330" y1="72" x2="330" y2="88" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<!-- crear equipo -->
+<rect x="240" y="138" width="180" height="34" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="330" y="152" text-anchor="middle" fill="#e6edf3" font-size="9" font-weight="600">Crear tunica, hacha</text>
+<text x="330" y="164" text-anchor="middle" fill="#8b949e" font-size="8">new Armadura(5) / new Arma(6)</text>
+<line x1="330" y1="122" x2="330" y2="138" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<!-- equipar -->
+<rect x="240" y="188" width="180" height="34" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="330" y="202" text-anchor="middle" fill="#e6edf3" font-size="9" font-weight="600">sacerdote.Equipar(tunica)</text>
+<text x="330" y="214" text-anchor="middle" fill="#8b949e" font-size="8">barbaro.Equipar(hacha)</text>
+<line x1="330" y1="172" x2="330" y2="188" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<!-- llamar batalla 1 -->
+<rect x="240" y="238" width="180" height="34" rx="6" fill="#0e1e40" stroke="#388bfd" stroke-width="1.2"/>
+<text x="330" y="252" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="700">Batalla(barbaro, sacerdote)</text>
+<text x="330" y="264" text-anchor="middle" fill="#58a6ff" font-size="8">método estático</text>
+<line x1="330" y1="222" x2="330" y2="238" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+
+<!-- FORK hacia Batalla swimlane -->
+<rect x="220" y="282" width="440" height="5" rx="2" fill="#56d364"/>
+<line x1="330" y1="272" x2="330" y2="282" stroke="#8b949e" stroke-width="1.2"/>
+<line x1="550" y1="287" x2="550" y2="300" stroke="#56d364" stroke-width="1.3" marker-end="url(#act-grn)"/>
+
+<!-- BATALLA inicio -->
+<rect x="460" y="300" width="180" height="34" rx="6" fill="#0d2010" stroke="#2ea043" stroke-width="1.2"/>
+<text x="550" y="314" text-anchor="middle" fill="#56d364" font-size="9" font-weight="700">Iniciar ronda</text>
+<text x="550" y="326" text-anchor="middle" fill="#3fb950" font-size="8">p1.vida &gt; 0 AND p2.vida &gt; 0</text>
+<line x1="550" y1="334" x2="550" y2="350" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+
+<!-- fork paralelo -->
+<rect x="440" y="350" width="440" height="4" rx="2" fill="#56d364"/>
+<line x1="660" y1="354" x2="660" y2="368" stroke="#56d364" stroke-width="1.3" marker-end="url(#act-grn)"/>
+<line x1="550" y1="354" x2="550" y2="368" stroke="#56d364" stroke-width="1.3" marker-end="url(#act-grn)"/>
+
+<!-- p1 ataca p2 -->
+<rect x="460" y="368" width="180" height="34" rx="6" fill="#1e1000" stroke="#e07c2a" stroke-width="1"/>
+<text x="550" y="382" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="600">p1.Atacar(p2)</text>
+<text x="550" y="394" text-anchor="middle" fill="#e07c2a" font-size="8">simultáneo</text>
+<!-- p2 ataca p1 (personaje swimlane) -->
+<rect x="680" y="368" width="180" height="34" rx="6" fill="#1e1000" stroke="#e07c2a" stroke-width="1"/>
+<text x="770" y="382" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="600">p2.Atacar(p1)</text>
+<text x="770" y="394" text-anchor="middle" fill="#e07c2a" font-size="8">simultáneo</text>
+
+<!-- Atacar internamente -->
+<line x1="550" y1="402" x2="550" y2="418" stroke="#8b949e" stroke-width="1" marker-end="url(#act-arr)"/>
+<line x1="770" y1="402" x2="770" y2="418" stroke="#8b949e" stroke-width="1" marker-end="url(#act-arr)"/>
+<rect x="460" y="418" width="180" height="44" rx="6" fill="#160b2e" stroke="#8957e5" stroke-width="1"/>
+<text x="550" y="432" text-anchor="middle" fill="#bc8cff" font-size="8.5" font-weight="600">Calcular daño</text>
+<text x="550" y="444" text-anchor="middle" fill="#9c73e3" font-size="7.5">getAtaque() + modAtk</text>
+<text x="550" y="455" text-anchor="middle" fill="#7a5ab0" font-size="7">¿override? → lógica especial</text>
+<rect x="680" y="418" width="180" height="44" rx="6" fill="#160b2e" stroke="#8957e5" stroke-width="1"/>
+<text x="770" y="432" text-anchor="middle" fill="#bc8cff" font-size="8.5" font-weight="600">Calcular daño</text>
+<text x="770" y="444" text-anchor="middle" fill="#9c73e3" font-size="7.5">getAtaque() + modAtk</text>
+<text x="770" y="455" text-anchor="middle" fill="#7a5ab0" font-size="7">¿override? → lógica especial</text>
+
+<!-- RecibirDanio -->
+<line x1="550" y1="462" x2="550" y2="478" stroke="#8b949e" stroke-width="1" marker-end="url(#act-arr)"/>
+<line x1="770" y1="462" x2="770" y2="478" stroke="#8b949e" stroke-width="1" marker-end="url(#act-arr)"/>
+<rect x="460" y="478" width="180" height="44" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="550" y="492" text-anchor="middle" fill="#e6edf3" font-size="8.5" font-weight="600">objetivo.RecibirDanio(d)</text>
+<text x="550" y="504" text-anchor="middle" fill="#8b949e" font-size="7.5">d = max(1, daño-armadura)</text>
+<text x="550" y="515" text-anchor="middle" fill="#484f58" font-size="7">vida = max(0, vida-d)</text>
+<rect x="680" y="478" width="180" height="44" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="770" y="492" text-anchor="middle" fill="#e6edf3" font-size="8.5" font-weight="600">objetivo.RecibirDanio(d)</text>
+<text x="770" y="504" text-anchor="middle" fill="#8b949e" font-size="7.5">d = max(1, daño-armadura)</text>
+<text x="770" y="515" text-anchor="middle" fill="#484f58" font-size="7">vida = max(0, vida-d)</text>
+
+<!-- JOIN -->
+<line x1="550" y1="522" x2="550" y2="540" stroke="#8b949e" stroke-width="1"/>
+<line x1="770" y1="522" x2="770" y2="540" stroke="#8b949e" stroke-width="1"/>
+<rect x="440" y="540" width="440" height="4" rx="2" fill="#56d364"/>
+<line x1="550" y1="544" x2="550" y2="558" stroke="#56d364" stroke-width="1.3" marker-end="url(#act-grn)"/>
+
+<!-- Decisión: ambos vivos? -->
+<polygon points="550,558 600,585 550,612 500,585" fill="#221800" stroke="#d29922" stroke-width="1.2"/>
+<text x="550" y="581" text-anchor="middle" fill="#e3b341" font-size="8.5" font-weight="700">¿Ambos</text>
+<text x="550" y="594" text-anchor="middle" fill="#e3b341" font-size="8.5" font-weight="700">vivos?</text>
+<!-- Sí → nueva ronda -->
+<path d="M500 585 Q430 585 430 340 Q430 300 460 300" fill="none" stroke="#56d364" stroke-width="1.2" marker-end="url(#act-grn)"/>
+<text x="420" y="450" fill="#3fb950" font-size="9" text-anchor="middle">Sí</text>
+<text x="420" y="462" fill="#3fb950" font-size="9" text-anchor="middle">→ nueva</text>
+<text x="420" y="474" fill="#3fb950" font-size="9" text-anchor="middle">ronda</text>
+<!-- No → determinar ganador -->
+<line x1="550" y1="612" x2="550" y2="630" stroke="#ff7b72" stroke-width="1.2" marker-end="url(#act-red)"/>
+<text x="562" y="622" fill="#ff7b72" font-size="9">No</text>
+
+<!-- Determinar ganador -->
+<rect x="460" y="630" width="180" height="44" rx="6" fill="#3d0f0f" stroke="#da3633" stroke-width="1.2"/>
+<text x="550" y="648" text-anchor="middle" fill="#ff7b72" font-size="9" font-weight="700">Determinar ganador</text>
+<text x="550" y="661" text-anchor="middle" fill="#da3633" font-size="7.5">p1.vida&gt;0 → p1</text>
+<text x="550" y="672" text-anchor="middle" fill="#da3633" font-size="7.5">p2.vida&gt;0 → p2 | else null</text>
+
+<!-- JOIN back to Main -->
+<rect x="220" y="688" width="440" height="5" rx="2" fill="#56d364"/>
+<line x1="550" y1="674" x2="550" y2="688" stroke="#8b949e" stroke-width="1.2"/>
+<line x1="330" y1="693" x2="330" y2="707" stroke="#56d364" stroke-width="1.3" marker-end="url(#act-grn)"/>
+
+<!-- Decisión ganador -->
+<polygon points="330,707 378,730 330,753 282,730" fill="#221800" stroke="#d29922" stroke-width="1.2"/>
+<text x="330" y="726" text-anchor="middle" fill="#e3b341" font-size="8.5" font-weight="700">¿Ganador</text>
+<text x="330" y="739" text-anchor="middle" fill="#e3b341" font-size="8.5" font-weight="700">existe?</text>
+
+<!-- Sí → mostrar ganador -->
+<line x1="330" y1="753" x2="330" y2="770" stroke="#56d364" stroke-width="1.2" marker-end="url(#act-grn)"/>
+<text x="342" y="765" fill="#3fb950" font-size="9">Sí</text>
+<rect x="240" y="770" width="180" height="30" rx="6" fill="#0d2010" stroke="#2ea043" stroke-width="1"/>
+<text x="330" y="789" text-anchor="middle" fill="#56d364" font-size="9">Imprimir nombre ganador</text>
+<!-- No → empate -->
+<line x1="282" y1="730" x2="140" y2="730" stroke="#ff7b72" stroke-width="1.2" marker-end="url(#act-red)"/>
+<text x="211" y="722" fill="#ff7b72" font-size="9" text-anchor="middle">No</text>
+<rect x="50" y="716" width="90" height="28" rx="6" fill="#3d0f0f" stroke="#da3633" stroke-width="1"/>
+<text x="95" y="734" text-anchor="middle" fill="#ff7b72" font-size="8.5">Sin ganador</text>
+
+<!-- Pedir datos usuario -->
+<line x1="330" y1="800" x2="330" y2="816" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<rect x="240" y="816" width="180" height="30" rx="6" fill="#221800" stroke="#d29922" stroke-width="1"/>
+<text x="330" y="835" text-anchor="middle" fill="#e3b341" font-size="9">Pedir datos al usuario</text>
+<!-- Usuario da datos -->
+<rect x="20" y="816" width="180" height="30" rx="6" fill="#21262d" stroke="#d29922" stroke-width="1"/>
+<text x="110" y="835" text-anchor="middle" fill="#e3b341" font-size="9">nombre · vida · ataque</text>
+<line x1="200" y1="831" x2="240" y2="831" stroke="#d29922" stroke-width="1.2" marker-end="url(#act-amb)"/>
+
+<!-- Crear personaje adicional -->
+<line x1="330" y1="846" x2="330" y2="862" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<rect x="240" y="862" width="180" height="30" rx="6" fill="#160b2e" stroke="#8957e5" stroke-width="1"/>
+<text x="330" y="881" text-anchor="middle" fill="#bc8cff" font-size="9">Crear PersonajeAdicional</text>
+
+<!-- Batalla 2 -->
+<line x1="330" y1="892" x2="330" y2="908" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<rect x="240" y="908" width="180" height="34" rx="6" fill="#0e1e40" stroke="#388bfd" stroke-width="1.2"/>
+<text x="330" y="922" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="700">Batalla(ganador, adicional)</text>
+<text x="330" y="936" text-anchor="middle" fill="#58a6ff" font-size="8">repite el mismo flujo</text>
+
+<!-- Mostrar resultado final -->
+<line x1="330" y1="942" x2="330" y2="958" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<rect x="240" y="958" width="180" height="30" rx="6" fill="#21262d" stroke="#444c56" stroke-width="1"/>
+<text x="330" y="977" text-anchor="middle" fill="#e6edf3" font-size="9">Imprimir resultado final</text>
+
+<!-- FIN -->
+<line x1="330" y1="988" x2="330" y2="1005" stroke="#8b949e" stroke-width="1.2" marker-end="url(#act-arr)"/>
+<circle cx="330" cy="1025" r="14" fill="#0d1117" stroke="#8b949e" stroke-width="2"/>
+<circle cx="330" cy="1025" r="8" fill="#8b949e"/>
+
+<!-- Sin ganador → FIN -->
+<path d="M95 744 Q95 1025 314 1025" fill="none" stroke="#ff7b72" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#act-red)"/>
+</svg>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 4 — DIAGRAMA DE SECUENCIA
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="p4">
+<h2>⑤ Diagrama de Secuencia <span>— interacción entre objetos durante una ronda de batalla</span></h2>
+<p class="desc">Muestra el intercambio de mensajes entre objetos durante una ronda de Batalla(). Las líneas de vida muestran la activación de cada objeto.</p>
+<div class="diagram-wrap" style="overflow-x:auto">
+<svg width="860" height="660" viewBox="0 0 860 660" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+<defs>
+  <marker id="seq-arr" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#79c0ff"/></marker>
+  <marker id="seq-ret" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#8b949e"/></marker>
+  <marker id="seq-grn" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#3fb950"/></marker>
+  <marker id="seq-red" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#ff7b72"/></marker>
+  <marker id="seq-amb" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#e3b341"/></marker>
+  <marker id="seq-ora" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0,7 3.5,0 7" fill="#f0a060"/></marker>
+</defs>
+
+<!-- Lifelines headers -->
+<!-- Main/Juego -->
+<rect x="40" y="14" width="110" height="42" rx="6" fill="#0e1e40" stroke="#388bfd" stroke-width="1.5"/>
+<text x="95" y="31" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="700">:Main</text>
+<text x="95" y="44" text-anchor="middle" fill="#58a6ff" font-size="7.5">Juego</text>
+<!-- Batalla -->
+<rect x="190" y="14" width="110" height="42" rx="6" fill="#0d2010" stroke="#2ea043" stroke-width="1.5"/>
+<text x="245" y="31" text-anchor="middle" fill="#56d364" font-size="9" font-weight="700">:Batalla</text>
+<text x="245" y="44" text-anchor="middle" fill="#3fb950" font-size="7.5">static</text>
+<!-- Bárbaro -->
+<rect x="340" y="14" width="110" height="42" rx="6" fill="#1e1000" stroke="#e07c2a" stroke-width="1.5"/>
+<text x="395" y="31" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="700">barbaro</text>
+<text x="395" y="44" text-anchor="middle" fill="#e07c2a" font-size="7.5">:Bárbaro</text>
+<!-- Sacerdote -->
+<rect x="490" y="14" width="110" height="42" rx="6" fill="#085041" stroke="#1a7f64" stroke-width="1.5"/>
+<text x="545" y="31" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="700">sacerdote</text>
+<text x="545" y="44" text-anchor="middle" fill="#1a7f64" font-size="7.5">:Sacerdote</text>
+<!-- Hacha -->
+<rect x="640" y="14" width="90" height="42" rx="6" fill="#160b2e" stroke="#8957e5" stroke-width="1.5"/>
+<text x="685" y="31" text-anchor="middle" fill="#bc8cff" font-size="9" font-weight="700">hacha</text>
+<text x="685" y="44" text-anchor="middle" fill="#8957e5" font-size="7.5">:Arma</text>
+<!-- Consola -->
+<rect x="760" y="14" width="80" height="42" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1.5"/>
+<text x="800" y="31" text-anchor="middle" fill="#c9d1d9" font-size="9" font-weight="700">Consola</text>
+<text x="800" y="44" text-anchor="middle" fill="#8b949e" font-size="7.5">stdout</text>
+
+<!-- Líneas de vida -->
+<line x1="95"  y1="56" x2="95"  y2="650" stroke="#388bfd" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+<line x1="245" y1="56" x2="245" y2="650" stroke="#2ea043" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+<line x1="395" y1="56" x2="395" y2="650" stroke="#e07c2a" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+<line x1="545" y1="56" x2="545" y2="650" stroke="#1a7f64" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+<line x1="685" y1="56" x2="685" y2="650" stroke="#8957e5" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+<line x1="800" y1="56" x2="800" y2="650" stroke="#8b949e" stroke-width="0.7" stroke-dasharray="5,4" opacity="0.6"/>
+
+<!-- Activation boxes -->
+<rect x="89"  y="90" width="12" height="530" rx="2" fill="#1a2f60" stroke="#388bfd" stroke-width="0.8"/>
+<rect x="239" y="110" width="12" height="480" rx="2" fill="#0d2010" stroke="#2ea043" stroke-width="0.8"/>
+<rect x="389" y="160" width="12" height="180" rx="2" fill="#1e1000" stroke="#e07c2a" stroke-width="0.8"/>
+<rect x="539" y="260" width="12" height="80"  rx="2" fill="#085041" stroke="#1a7f64" stroke-width="0.8"/>
+<rect x="679" y="160" width="12" height="80"  rx="2" fill="#2c1f5e" stroke="#8957e5" stroke-width="0.8"/>
+<rect x="389" y="390" width="12" height="120" rx="2" fill="#1e1000" stroke="#e07c2a" stroke-width="0.8" opacity="0.7"/>
+
+<!-- ── Mensajes ── -->
+<!-- 1. Batalla() -->
+<line x1="101" y1="110" x2="239" y2="110" stroke="#79c0ff" stroke-width="1.3" marker-end="url(#seq-arr)"/>
+<text x="170" y="106" text-anchor="middle" fill="#79c0ff" font-size="9" font-weight="600">1. Batalla(barbaro, sacerdote)</text>
+
+<!-- 2. loop ronda -->
+<rect x="225" y="126" width="580" height="300" rx="4" fill="none" stroke="#30363d" stroke-width="0.8" stroke-dasharray="8,4"/>
+<text x="235" y="140" fill="#8b949e" font-size="8">loop [p1.vida&gt;0 AND p2.vida&gt;0]</text>
+
+<!-- 3. p1.Atacar(p2) -->
+<line x1="251" y1="155" x2="389" y2="155" stroke="#f0a060" stroke-width="1.3" marker-end="url(#seq-ora)"/>
+<text x="320" y="151" text-anchor="middle" fill="#f0a060" font-size="9">2. barbaro.Atacar(sacerdote)</text>
+
+<!-- 4. barbaro.getAtaque() -->
+<line x1="401" y1="172" x2="679" y2="172" stroke="#bc8cff" stroke-width="1.2" marker-end="url(#seq-arr)"/>
+<text x="540" y="168" text-anchor="middle" fill="#bc8cff" font-size="8.5">3. getAtaque() → usa equipo</text>
+<!-- retorno getAtaque -->
+<line x1="679" y1="185" x2="401" y2="185" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#seq-ret)"/>
+<text x="540" y="181" text-anchor="middle" fill="#484f58" font-size="8">← modAtaque = 6</text>
+
+<!-- 5. override: Dave ataca furioso -->
+<rect x="370" y="194" width="200" height="26" rx="4" fill="#1e1000" stroke="#e07c2a" stroke-width="0.8"/>
+<text x="470" y="204" text-anchor="middle" fill="#f0a060" font-size="8">override: furia≥3</text>
+<text x="470" y="214" text-anchor="middle" fill="#e07c2a" font-size="8">daño×1.15, furia-=3</text>
+
+<!-- 6. log "Dave ataca furioso" -->
+<line x1="401" y1="228" x2="800" y2="228" stroke="#c9d1d9" stroke-width="1" marker-end="url(#seq-arr)"/>
+<text x="600" y="224" text-anchor="middle" fill="#8b949e" font-size="8">4. Console.WriteLine("Dave ataca furioso")</text>
+
+<!-- 7. sacerdote.RecibirDanio -->
+<line x1="401" y1="248" x2="539" y2="248" stroke="#f0a060" stroke-width="1.3" marker-end="url(#seq-ora)"/>
+<text x="470" y="244" text-anchor="middle" fill="#f0a060" font-size="9">5. sacerdote.RecibirDanio(d)</text>
+
+<!-- override sacerdote? -->
+<rect x="520" y="258" width="185" height="36" rx="4" fill="#085041" stroke="#1a7f64" stroke-width="0.8"/>
+<text x="612" y="270" text-anchor="middle" fill="#3fb950" font-size="8">override: ¿contador%4==0?</text>
+<text x="612" y="282" text-anchor="middle" fill="#1a7f64" font-size="8">Sí → danio/2 + plegaria</text>
+
+<!-- log recibe daño -->
+<line x1="551" y1="300" x2="800" y2="300" stroke="#c9d1d9" stroke-width="1" marker-end="url(#seq-arr)"/>
+<text x="676" y="296" text-anchor="middle" fill="#8b949e" font-size="8">6. "Samson recibe X pts"</text>
+
+<!-- retorno Atacar -->
+<line x1="389" y1="316" x2="251" y2="316" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#seq-ret)"/>
+<text x="320" y="312" text-anchor="middle" fill="#484f58" font-size="8">← (void)</text>
+
+<!-- 8. p2.Atacar(p1) simultáneo -->
+<line x1="251" y1="340" x2="539" y2="340" stroke="#3fb950" stroke-width="1.3" marker-end="url(#seq-grn)"/>
+<text x="395" y="336" text-anchor="middle" fill="#3fb950" font-size="9">7. sacerdote.Atacar(barbaro) — simultáneo</text>
+
+<!-- sacerdote calcula daño -->
+<rect x="520" y="350" width="185" height="28" rx="4" fill="#085041" stroke="#1a7f64" stroke-width="0.8"/>
+<text x="612" y="362" text-anchor="middle" fill="#3fb950" font-size="8">5+0 (sin equipo) = 5 daño</text>
+<text x="612" y="373" text-anchor="middle" fill="#1a7f64" font-size="7.5">getArmadura() hacha no aplica</text>
+<!-- log -->
+<line x1="551" y1="385" x2="800" y2="385" stroke="#c9d1d9" stroke-width="1" marker-end="url(#seq-arr)"/>
+<text x="676" y="381" text-anchor="middle" fill="#8b949e" font-size="8">8. "Dave recibe 5 pts"</text>
+<!-- retorno -->
+<line x1="539" y1="400" x2="251" y2="400" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#seq-ret)"/>
+<text x="395" y="395" text-anchor="middle" fill="#484f58" font-size="8">← (void)</text>
+
+<!-- fin loop -->
+<text x="240" y="434" fill="#8b949e" font-size="8">[repite hasta que vida ≤ 0]</text>
+
+<!-- retorno ganador -->
+<line x1="239" y1="448" x2="101" y2="448" stroke="#8b949e" stroke-width="1.3" stroke-dasharray="6,3" marker-end="url(#seq-ret)"/>
+<text x="170" y="442" text-anchor="middle" fill="#56d364" font-size="9">9. return ganador (Personaje?)</text>
+
+<!-- imprimir resultado -->
+<line x1="101" y1="470" x2="800" y2="470" stroke="#c9d1d9" stroke-width="1.3" marker-end="url(#seq-arr)"/>
+<text x="450" y="466" text-anchor="middle" fill="#c9d1d9" font-size="9">10. "Dave ha ganado la batalla"</text>
+
+<!-- alt: sin ganador -->
+<rect x="80" y="490" width="720" height="50" rx="4" fill="none" stroke="#30363d" stroke-width="0.8" stroke-dasharray="6,4"/>
+<text x="90" y="504" fill="#8b949e" font-size="8">alt [ganador == null]</text>
+<line x1="101" y1="518" x2="800" y2="518" stroke="#ff7b72" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#seq-red)"/>
+<text x="450" y="514" text-anchor="middle" fill="#ff7b72" font-size="9">10b. "Nadie ha ganado"</text>
+
+<!-- 11. Pedir datos -->
+<line x1="95" y1="560" x2="800" y2="560" stroke="#e3b341" stroke-width="1.3" marker-end="url(#seq-amb)"/>
+<text x="450" y="556" text-anchor="middle" fill="#e3b341" font-size="9">11. Console.ReadLine() → datos PersonajeAdicional</text>
+
+<!-- 12. Batalla 2 -->
+<line x1="101" y1="590" x2="239" y2="590" stroke="#79c0ff" stroke-width="1.3" marker-end="url(#seq-arr)"/>
+<text x="170" y="586" text-anchor="middle" fill="#79c0ff" font-size="9">12. Batalla(ganador, adicional)</text>
+<text x="170" y="598" text-anchor="middle" fill="#484f58" font-size="7.5">[mismo flujo anterior]</text>
+</svg>
+</div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     PANEL 5 — DIAGRAMA DE ESTADOS
+════════════════════════════════════════════════════════ -->
+<div class="panel" id="p5">
+<h2>⑥ Diagrama de Estados <span>— ciclo de vida de un Personaje</span></h2>
+<p class="desc">Muestra todos los estados posibles de un Personaje desde su creación hasta su muerte, incluyendo los estados especiales de Bárbaro y Sacerdote.</p>
+<div class="diagram-wrap">
+<svg width="860" height="620" viewBox="0 0 860 620" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono',monospace">
+<defs>
+  <marker id="st-arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#8b949e"/></marker>
+  <marker id="st-grn" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#56d364"/></marker>
+  <marker id="st-red" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#ff7b72"/></marker>
+  <marker id="st-amb" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#e3b341"/></marker>
+  <marker id="st-ora" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#f0a060"/></marker>
+  <marker id="st-pur" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><polygon points="0 0,8 4,0 8" fill="#bc8cff"/></marker>
+</defs>
+
+<!-- Inicio -->
+<circle cx="100" cy="60" r="14" fill="#388bfd"/>
+<!-- Estado: CREADO -->
+<rect x="160" y="44" width="150" height="50" rx="10" fill="#0e1e40" stroke="#388bfd" stroke-width="2"/>
+<text x="235" y="65" text-anchor="middle" fill="#79c0ff" font-size="11" font-weight="700">CREADO</text>
+<text x="235" y="80" text-anchor="middle" fill="#58a6ff" font-size="8">nombre · vida · ataque inicializados</text>
+<line x1="114" y1="60" x2="160" y2="65" stroke="#56d364" stroke-width="1.5" marker-end="url(#st-grn)"/>
+<text x="135" y="54" fill="#3fb950" font-size="8.5">new()</text>
+
+<!-- CREADO → SIN EQUIPO -->
+<line x1="310" y1="68" x2="390" y2="68" stroke="#8b949e" stroke-width="1.3" marker-end="url(#st-arr)"/>
+<text x="350" y="62" text-anchor="middle" fill="#8b949e" font-size="8">init</text>
+<!-- Estado: SIN EQUIPO -->
+<rect x="390" y="44" width="155" height="50" rx="10" fill="#21262d" stroke="#444c56" stroke-width="1.5"/>
+<text x="467" y="65" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="700">SIN EQUIPO</text>
+<text x="467" y="80" text-anchor="middle" fill="#8b949e" font-size="8">equipo = null · armadura = 0</text>
+
+<!-- SIN EQUIPO → CON EQUIPO -->
+<line x1="545" y1="68" x2="625" y2="68" stroke="#8b949e" stroke-width="1.3" marker-end="url(#st-arr)"/>
+<text x="584" y="62" text-anchor="middle" fill="#8b949e" font-size="8">Equipar(e)</text>
+<!-- Estado: CON EQUIPO -->
+<rect x="625" y="44" width="155" height="50" rx="10" fill="#160b2e" stroke="#8957e5" stroke-width="1.5"/>
+<text x="702" y="65" text-anchor="middle" fill="#bc8cff" font-size="11" font-weight="700">CON EQUIPO</text>
+<text x="702" y="80" text-anchor="middle" fill="#9c73e3" font-size="8">modAtk · modArm activos</text>
+
+<!-- CON EQUIPO → SIN EQUIPO (re-equipar con otro) -->
+<path d="M702 94 Q702 112 580 112 Q467 112 467 94" fill="none" stroke="#8957e5" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#st-pur)"/>
+<text x="580" y="122" text-anchor="middle" fill="#8957e5" font-size="8">Equipar(otroEquipo)</text>
+
+<!-- ── Estado VIVO (contenedor) ── -->
+<rect x="60" y="150" width="740" height="310" rx="12" fill="none" stroke="#2ea043" stroke-width="1.5" stroke-dasharray="8,4"/>
+<text x="90" y="170" fill="#2ea043" font-size="9" font-weight="700">VIVO [vida &gt; 0]</text>
+
+<!-- Estado: EN ESPERA -->
+<rect x="100" y="185" width="140" height="50" rx="8" fill="#0d2010" stroke="#2ea043" stroke-width="1.5"/>
+<text x="170" y="205" text-anchor="middle" fill="#56d364" font-size="10" font-weight="700">EN ESPERA</text>
+<text x="170" y="218" text-anchor="middle" fill="#3fb950" font-size="8">turno de otro</text>
+
+<!-- EN ESPERA → ATACANDO -->
+<line x1="240" y1="210" x2="320" y2="210" stroke="#f0a060" stroke-width="1.3" marker-end="url(#st-ora)"/>
+<text x="280" y="204" text-anchor="middle" fill="#f0a060" font-size="8">Atacar()</text>
+
+<!-- Estado: ATACANDO -->
+<rect x="320" y="185" width="155" height="70" rx="8" fill="#1e1000" stroke="#e07c2a" stroke-width="1.5"/>
+<text x="397" y="208" text-anchor="middle" fill="#f0a060" font-size="10" font-weight="700">ATACANDO</text>
+<text x="397" y="222" text-anchor="middle" fill="#e07c2a" font-size="8">calcula daño</text>
+<text x="397" y="234" text-anchor="middle" fill="#7a4010" font-size="8">getAtaque() + modAtk</text>
+<text x="397" y="246" text-anchor="middle" fill="#484f58" font-size="7.5">llama RecibirDanio()</text>
+
+<!-- ATACANDO → EN ESPERA -->
+<path d="M320 232 Q260 258 240 232" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#st-arr)"/>
+<text x="265" y="265" text-anchor="middle" fill="#484f58" font-size="8">fin turno</text>
+
+<!-- Estado: RECIBIENDO DAÑO -->
+<rect x="530" y="185" width="155" height="70" rx="8" fill="#3d0f0f" stroke="#da3633" stroke-width="1.5"/>
+<text x="607" y="208" text-anchor="middle" fill="#ff7b72" font-size="9" font-weight="700">RECIBIENDO</text>
+<text x="607" y="220" text-anchor="middle" fill="#ff7b72" font-size="9" font-weight="700">DAÑO</text>
+<text x="607" y="234" text-anchor="middle" fill="#da3633" font-size="8">d = max(1, d-arm)</text>
+<text x="607" y="246" text-anchor="middle" fill="#7a1515" font-size="7.5">vida = max(0, vida-d)</text>
+
+<!-- ATACANDO → RECIBIENDO DAÑO -->
+<line x1="475" y1="216" x2="528" y2="216" stroke="#ff7b72" stroke-width="1.3" marker-end="url(#st-red)"/>
+<text x="502" y="210" text-anchor="middle" fill="#ff7b72" font-size="8">obj.RecibirDanio(d)</text>
+
+<!-- ── Sub-estados especiales ── -->
+<!-- Bárbaro furieso -->
+<rect x="100" y="300" width="160" height="60" rx="8" fill="#221000" stroke="#f0a060" stroke-width="1.2" stroke-dasharray="5,3"/>
+<text x="180" y="320" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="700">BÁRBARO</text>
+<text x="180" y="332" text-anchor="middle" fill="#f0a060" font-size="9" font-weight="700">FURIOSO</text>
+<text x="180" y="344" text-anchor="middle" fill="#e07c2a" font-size="7.5">furia≥3 → daño×1.15</text>
+<text x="180" y="354" text-anchor="middle" fill="#7a4010" font-size="7.5">furia-=3</text>
+<path d="M320 220 Q280 280 260 330" fill="none" stroke="#f0a060" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#st-ora)"/>
+<text x="285" y="295" fill="#f0a060" font-size="8">si furia≥3</text>
+
+<!-- Bárbaro cansado -->
+<rect x="290" y="300" width="160" height="60" rx="8" fill="#221800" stroke="#d29922" stroke-width="1.2" stroke-dasharray="5,3"/>
+<text x="370" y="320" text-anchor="middle" fill="#e3b341" font-size="9" font-weight="700">BÁRBARO</text>
+<text x="370" y="332" text-anchor="middle" fill="#e3b341" font-size="9" font-weight="700">CANSADO</text>
+<text x="370" y="344" text-anchor="middle" fill="#d29922" font-size="7.5">furia&lt;3 → daño×0.50</text>
+<path d="M340 240 Q340 270 370 299" fill="none" stroke="#d29922" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#st-amb)"/>
+<text x="362" y="285" fill="#d29922" font-size="8">si furia&lt;3</text>
+
+<!-- Sacerdote protegido -->
+<rect x="480" y="300" width="160" height="60" rx="8" fill="#085041" stroke="#1a7f64" stroke-width="1.2" stroke-dasharray="5,3"/>
+<text x="560" y="320" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="700">SACERDOTE</text>
+<text x="560" y="332" text-anchor="middle" fill="#3fb950" font-size="9" font-weight="700">PROTEGIDO</text>
+<text x="560" y="344" text-anchor="middle" fill="#1a7f64" font-size="7.5">contador%4==0</text>
+<text x="560" y="354" text-anchor="middle" fill="#0f5037" font-size="7.5">daño reducido ÷2</text>
+<path d="M607 255 Q607 278 580 299" fill="none" stroke="#1a7f64" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#st-grn)"/>
+<text x="635" y="285" fill="#1a7f64" font-size="8">1/4 ataques</text>
+
+<!-- Estado: MUERTO -->
+<rect x="300" y="490" width="200" height="55" rx="10" fill="#1a0000" stroke="#da3633" stroke-width="2"/>
+<text x="400" y="514" text-anchor="middle" fill="#ff7b72" font-size="13" font-weight="700">MUERTO</text>
+<text x="400" y="530" text-anchor="middle" fill="#da3633" font-size="8">vida = 0 · fin participación</text>
+
+<!-- RECIBIENDO DAÑO → MUERTO (si vida=0) -->
+<line x1="607" y1="255" x2="490" y2="490" stroke="#ff7b72" stroke-width="1.5" marker-end="url(#st-red)"/>
+<text x="570" y="390" fill="#ff7b72" font-size="8.5">vida = 0</text>
+<!-- RECIBIENDO DAÑO → EN ESPERA (si vida>0) -->
+<path d="M607 255 Q670 400 350 210" fill="none" stroke="#8b949e" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#st-arr)"/>
+<text x="700" y="350" fill="#8b949e" font-size="8">vida&gt;0</text>
+
+<!-- VIVO → MUERTO -->
+<line x1="400" y1="460" x2="400" y2="490" stroke="#ff7b72" stroke-width="1.5" marker-end="url(#st-red)"/>
+
+<!-- Estado final -->
+<circle cx="400" cy="590" r="14" fill="#0d1117" stroke="#8b949e" stroke-width="2"/>
+<circle cx="400" cy="590" r="8" fill="#8b949e"/>
+<line x1="400" y1="545" x2="400" y2="574" stroke="#8b949e" stroke-width="1.3" marker-end="url(#st-arr)"/>
+
+<!-- nota: vivo desde Main -->
+<path d="M467 68 Q467 145 150 152" fill="none" stroke="#2ea043" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#st-grn)"/>
+<text x="400" y="142" fill="#2ea043" font-size="8.5">Personaje entra a batalla</text>
+</svg>
+</div>
+<div class="act-note">💡 Los estados BÁRBARO FURIOSO/CANSADO y SACERDOTE PROTEGIDO son sub-estados dentro de ATACANDO/RECIBIENDO DAÑO. El polimorfismo (override) determina cuál sub-estado se activa en tiempo de ejecución.</div>
+</div>
+
+</div><!-- content -->
+
+<script>
+const panels=document.querySelectorAll(".panel");
+const tabs=document.querySelectorAll(".tab");
+function show(i,btn){
+  panels.forEach((p,j)=>{p.classList.toggle("active",j===i);});
+  tabs.forEach((t,j)=>{t.classList.toggle("active",j===i);});
+}
+</script>
+</body>
+</html>

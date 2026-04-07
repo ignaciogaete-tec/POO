@@ -1,0 +1,176 @@
+trabajo Ev1
+    Fecha de entrega No hay fecha de entrega max dom 12
+    Objetivo
+    Crear un programa que simule la lucha entre 2 personajes, utilizando los conceptos aprendidos en clases.
+
+    Entrega
+        Domingo 12 de Abril, 23:59hrs.
+
+    Requisitos
+        El trabajo es de carácter individual o en parejas. 
+            En caso de ser en parejas, ambos recibirán la misma nota por el trabajo
+        Parte de la evaluación consiste en una interrogación que consta de 3 preguntas, 
+            o en caso de las parejas, 1 para cada uno. La interrogación será el martes 15 de abril
+        La entrega será mediante un link a un repositorio público de GIT
+            Debe crear un proyecto llamado “Juego”, en el cual 
+            haya clases, con 
+                atributos 
+                y métodos tales de pueda simular la lucha entre 2 personajes. 
+                La estructura del programa se presenta aquíLinks 
+                    to an external site..
+                    https://mermaid.live/edit#pako:eNqVVU2P0zAQ_SuRTwHSKp_NbsSly3JBWoSExAHlMo3drJfE7jpJBZT-d2zno3GSsosvjWfevBk_P7knlHFMUIKyAqrqnkIuoEyZJZeOWJ8aknPr1IbUemc9AGX2m3HkDmooCrC_EFFxBk_EOniONdr5HfycsjH5BTFqsLKqWlCWW4yXO0HGCcpq60gxTGOy_XNjID8-N_TALaJ_-qbtsENT2-jjDOzOiNM4ZofPSf1Zl5giqCKZ-iYZFhNbTbicEiXgRkzqjpxiNUYGYqQs3z2Rmh75HCpIRndU3AOj3FbMWH3NcVoUyWlotHxBdyB2ILh5PYp63wgKpq4d9jWqOheO-XjbF048GfErZERgXhPTpEP4lbf8f2pOZuiUnKlUckz3NAPMxXZm0Smg84A5SstsL5I51yiWLPYwrbZfQk08OTmySpuKq8jyoNcZVIM5i27777Nde0i2mGZUfhWKdQK9OOr9n9Wq9-tibnDPYnberYV1NtAYNe9ydHzJI5Ov-kerzbTv7ttxt2mihyMH5YJilNRCmgKVRDZRW6SFTVH9SEqSokR-YhA_UpSys6w5APvOedmXCd7kjyjZQ1HJXXPAUJPu_2CAEIaJ-MAbVqPECzQFSk7oJ0qC2FsHt9HGi8Iw9N1NGDroF0rCeH0bxGEcBW4Y30ReeHbQb93UXd_EkSuXv3Hj2PUj__wXBVkJPw
+
+        Se debe respetar 
+            la definición de los atributos 
+            y métodos del diagrama anterior. 
+            De igual manera, se debe usar el principio de ocultación según corresponda
+
+        A continuación se presenta un código base para la clase Juego, 
+            que servirá para probar que el código generado funciona según las especificaciones:
+            Captura de pantalla 2025-04-03 a la(s) 5.56.59 p.m..png
+            
+
+        La implementación del código de cada clase debe seguir las siguientes especificaciones:
+    
+
+    Juego
+    Métodos
+    Main: Código base del programa. No debe sustituir el código delimitado por los comentarios. Al llamar a batalla, este devolverá el ganador, por lo que debe imprimir en consola la información de quién ganó, y luego de eso, crear una tercera instancia de un personaje de una clase creada por usted (Las condiciones de esta clase estarán detalladas más adelante en el documento) con datos que el mismo usuario debe proporcionar). Estos datos como mínimo deben contemplar el nombre, vida y ataque de la nueva instancia. Cree un Equipo, y equipe a la nueva instancia con ese equipo. Esta nueva instancia debe luchar con el ganador anterior (Si existiera. Sino, termine la ejecución del programa), y de la misma forma, imprimir el resultado de esta última batalla.
+    Batalla: Método estático que simulará una batalla entre p1 y p2. Esta batalla debe contar con rondas, en las cuales ambos atacaran al mismo tiempo. Si ambos personajes siguen vivos luego de estos ataques simultáneos (Es decir, sus vidas son mayores a 0) se debe proceder a una siguiente ronda, hasta que alguno (O los dos) caiga.
+    parámetros:
+    p1: Personaje que luchará con p2
+    p2: Personaje que luchará con p1
+    retorno: la instancia de Personaje que resulte ganadora, o null en caso de no haber ganador
+    Personaje
+    Atributos
+    nombre: Nombre del Personaje
+    vida: Entero que representa la vida restante del Personaje
+    ataque: Entero que representa el daño que hace el Personaje con cada ataque
+    equipo: Equipo que tiene equipado el Personaje. Inicialmente el Personaje no cuenta con equipo
+    Métodos
+    constructor: inicializa el nombre, vida y ataque inicial del Personaje
+    GetNombre: retorna el nombre asignado el Personaje
+    GetVida: retorna la vida restante del Personaje
+    GetAtaque: retorna un entero representando el daño que realizará el Personaje cuando se utilice atacar. El daño a realizar debe ser calculado según la siguiente fórmula:
+    dañoTotal = ataque + modificadorDeAtaqueDeEquipo
+
+    Tenga en consideración que si no tiene un Equipo equipado, el modificador no existe
+
+    retorno: entero que indica cuando daño realiza el ataque
+    GetArmadura: retorna un entero que representa la cantidad de armadura que tiene el Personaje. Todos los personajes tienen 0 de armadura, a menos que tenga equipado un Equipo que la aumente
+    retorno: entero que será usado en recibirDanio para calcular el dañoTotal. De no tener nada equipado, deberá retornar 0
+    Atacar: método que se utiliza para realizar daño a un Personaje objetivo. Dentro de este método debe llamar a recibirDanio del objetivo. El daño a realizar debe ser obtenido desde getAtaque. Debe imprimir quién está atacando y a quien está atacando (Ej: “Samson ataca a Dave”)
+    parámetros:
+    objetivo: Personaje al que se le hará daño a través de la llamada de recibirDanio
+    RecibirDanio: método que será utilizado por el Personaje atacante que esté usando atacar. El daño total debe ser restado a la vida actual del Personaje. El cálculo del daño debe ser el siguiente:
+    dañoTotal = danio - armadura
+
+    El daño mínimo es 1.
+
+    La vida restante después de recibir daño no puede ser menor a 0.
+
+    Imprima el nombre de quien ha recibido daño, cuanto daño ha recibido, y si después de haber recibido daño, está muerto. Considere que el personaje ha muerto cuando su vida llega a 0 (Ej: “Dave recibe 3 puntos de daño.”, “Samson recibe 5 puntos de daño. Ha muerto :(“)
+
+    parámetros
+    danio: un entero indicando el daño del ataque recibido
+    Equipar: método con el cual se equipará a un Personaje con un Equipo. Notar que solo se puede tener un Equipo a la vez equipado
+    parámetros:
+    equipo: Equipo que reemplazará el equipo actual del Personaje
+    
+
+    Sacerdote
+    Métodos
+    constructor: inicializa el nombre, vida y ataque inicial del Sacerdote
+    recibirDanio: El sacerdote tiene la bendición de los dioses, provocando que de vez en cuando escuchen sus plegarias de protección. Este método sobrescribe el método original de su clase padre, provocando que 1 de cada 4 ataques vean su daño reducido a la mitad. Cada vez que esto ocurra, deberá de imprimir un aviso sobre este suceso (Ej: “Las plegarias de Samson han sido escuchadas”). En caso contrario el daño lo recibirá normalmente.
+    Para efectos del daño recibido redondee.
+    parámetros: 
+    danio: entero que indicará cuánto daño va a recibir
+    Bárbaro
+    Atributos
+    furia: Entero que indicará la furia restante del Bárbaro. Mientras tenga furia los ataques del Bárbaro se verán potenciados
+    Métodos
+    constructor: inicializa el nombre, vida, ataque y furia inicial del Bárbaro
+    Atacar: A diferencia del Sacerdote, las únicas plegarias que escuchan los dioses son las de los oponentes del Bárbaro. Mientras tenga furia, cada vez que ataque el Bárbaro hará más daño del normal (15% más concretamente), a la vez que restará 3 puntos de furia. En caso de que esto ocurra, deberá imprimir este suceso (Ej: “Dave ataca furioso”). De no contar con furia suficiente (Recuerde, se necesita como mínimo 3 puntos de furia), su daño se verá reducido en un 50% de su daño normal. Si ocurre esto, imprima este suceso (Ej: “Dave está cansado”). Estar enojado tanto tiempo tiene sus consecuencias.
+    Para efectos de daño, redondee el resultado de este.
+    parámetros:
+    objetivo: Personaje al que se le hará daño a través de la llamada de recibirDanio
+    Equipo
+    Atributos
+    modificadorAtaque: entero que indicará cuánto aumentará el ataque del Personaje al cual está equipado
+    modificadorArmadura: entero que indicará cuanto aumentará la armadura del Personaje al cual está equipado
+    Métodos
+    constructor: inicializa el modificadorAtaque y modificadorArmadura inicial del Equipo
+    getModificadorAtaque: retornará el valor de modificadorAtaque
+    getModificadorArmadura: retornará el valor de modificadorArmadura
+    Arma
+    Métodos
+    constructor: permite solo modificar el modificadorAtaque del Equipo. El modificadorArmadura debe ser 0
+    Armadura
+    Métodos
+    constructor: permite solo modificar el modificadorArmadura del Equipo. El modificadorAtaque debe ser 0
+    Personaje Adicional
+    Debe crear una clase adicional que extienda de Personaje, la cual instanciará al momento de realizar la segunda batalla dentro de main en Juego. Esta clase debe tener alguna particularidad que la distinga de las otras. A continuación algunos ejemplos:
+
+    Un pícaro que tiene un 5% de probabilidad de doblar el daño al realizar un ataque
+    Un paladín que cada vez que ataca regenera un poco de vida
+    Un bardo que cada vez que ataca lanza alguna frase aleatoria sin efecto alguno
+    Un hechicero que no sabe controlar su magia, por lo que a veces es muy efectiva, y otras no tanto. Su daño de ataque se puede ver incrementado o disminuido de forma aleatoria hasta en un 20%
+    Es probable que necesite modificar la clase base Personaje para lograr su objetivo (Por ejemplo, agregando setters para modificar la vida del personaje en el caso del Paladín). En estos casos haga las modificaciones pertinentes, siempre y cuando no afecten a los requisitos anteriores.
+
+    Como dice la imagen con el código base, las características del nuevo personaje deben ser ingresados por el usuario mediante consola (Como mínimo, solicite el nombre, vida y ataque del nuevo personaje).
+
+    Ejemplo de ejecución
+    A continuación verá un ejemplo de la salida al ejecutar el programa:
+
+    
+
+    Dave ataca a Samson
+
+    Dave ataca furioso
+
+    Samson recibe 7 puntos de daño
+
+    Samson ataca a Dave
+
+    Dave recibe 12 puntos de daño
+
+    Dave ataca a Samson
+
+    Dave ataca furioso
+
+    Las plegarias de Samson han sido escuchadas
+
+    Samson recibe 4 puntos de daño
+
+    Samson ataca a Dave
+
+    Dave recibe 12 puntos de daño
+
+    Dave ataca a Samson
+
+    Dave ataca furioso
+
+    Samson recibe 7 puntos de daño
+
+    Samson ataca a Dave
+
+    Dave recibe 12 puntos de daño
+
+    Dave ataca a Samson
+
+    Dave ataca furioso
+
+    Samson recibe 7 puntos de daño. Ha muerto :(
+
+    Samson ataca a Dave
+
+    Dave recibe 12 puntos de daño
+
+    Dave ha ganado la batalla
+
+    
+
+    Note que la salida anterior solo toma en cuenta la primera batalla.
+
+    ¡Éxito!
+
