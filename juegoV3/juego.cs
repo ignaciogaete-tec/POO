@@ -194,8 +194,13 @@ class Juego
 {
     static void Main()
     {
-        Personaje p1 = new Barbaro("Dave", 40, 8, 10);
-        Personaje p2 = new Sacerdote("Samson", 35, 7);
+       ronda(); 
+    }
+
+    public static void ronda();
+    {
+        Personaje p1 = new Barbaro("Dave", 30, 8, 10);
+        Personaje p2 = new Sacerdote("Samson", 30, 7);
 
         p1.Equipar(new Arma(3));
         p2.Equipar(new Armadura(2));
@@ -206,8 +211,9 @@ class Juego
         {
             Console.WriteLine($"\n{ganador.GetNombre()} ha ganado la batalla");
 
-            Personaje musashi = new Musashi("Musashi", 30, 9);
+            Personaje musashi = new Musashi("Musashi", 10, 4);
             musashi.Equipar(new Arma(2));
+
 
             Console.WriteLine("\n--- Segunda batalla ---\n");
 
@@ -217,7 +223,13 @@ class Juego
                 Console.WriteLine($"\n{ganadorFinal.GetNombre()} ha ganado la batalla final");
             else
                 Console.WriteLine("\nNo hubo ganador en la batalla final");
+        //SI ES NULO es empate y han muerto? 
+        } 
+        else
+        {
+           Console.WriteLine("ambos personajes han muerto porlo que Musashi no tiene con quien pelear"); 
         }
+        
     }
 
     public static Personaje Batalla(Personaje p1, Personaje p2)
@@ -226,14 +238,16 @@ class Juego
 
         while (p1.EstaVivo() && p2.EstaVivo())
         {
-            Console.WriteLine($"{p1.GetNombre()} ataca a {p2.GetNombre()}");
-            Console.WriteLine($"{p2.GetNombre()} ataca a {p1.GetNombre()}");
+            Console.WriteLine($"{p1.GetNombre()} Lucha con {p2.GetNombre()}");
+            // Console.WriteLine($"{p2.GetNombre()} ataca a {p1.GetNombre()}");
 
             int danioP1 = p1.CalcularDanio();
             int danioP2 = p2.CalcularDanio();
 
             p2.AplicarDanio(danioP1);
             p1.AplicarDanio(danioP2);
+            Console.WriteLine($"-{p1.GetNombre()} VIDA RESTANTE: " + p1.GetVida());
+            Console.WriteLine($"-{p2.GetNombre()} VIDA RESTANTE: " + p2.GetVida());
 
             // Habilidad especial Musashi después del daño
             if (p1 is Musashi m1) m1.AplicarHabilidad(p2);
