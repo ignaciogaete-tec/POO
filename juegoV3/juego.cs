@@ -112,14 +112,14 @@ class Barbaro : Personaje
 
 class Musashi : Personaje
 {
-    private static Random random = new Random();
+    //private static Random random = new Random();
     private bool desarmar = false;
 
     public Musashi(string n, int v, int a) : base(n, v, a) { }
 
     public override int CalcularDanio()
     {
-        desarmar = (random.Next(1, 5) == 1);
+        desarmar = (Random.Shared.Next(1, 5) == 1);
         if (desarmar) Console.WriteLine($"{GetNombre()} prepara un intento de desarme...");
         return GetAtaque();
     }
