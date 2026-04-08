@@ -169,12 +169,14 @@ class Juego
 
     public static Personaje Batalla(Personaje p1, Personaje p2)
     {
-        Console.WriteLine($"\n--- INICIO: {p1.GetNombre()} vs {p2.GetNombre()} ---");
+        Console.WriteLine($"\n--- INICIO: {p1.GetNombre()} VS {p2.GetNombre()} ---");
         int contadorRonda=0;
         while (p1.EstaVivo() && p2.EstaVivo())
         {
             contadorRonda=contadorRonda+1;
             Console.WriteLine($"------Ronda No {contadorRonda}--------------");
+            Console.WriteLine($"{p1.GetNombre()} Y {p2.GetNombre()} Luchan ..");
+            
             int d1 = p1.CalcularDanio();
             int d2 = p2.CalcularDanio();
 
