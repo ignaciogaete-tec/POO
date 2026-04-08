@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography.X509Certificates;
 
 // ===================== EQUIPO =====================
 class Equipo
@@ -137,9 +138,7 @@ class Musashi : Personaje
 // ===================== JUEGO =====================
 class Juego
 {
-    static void Main() => ronda();
-
-    public static void ronda() // Corregido: sin punto y coma extra
+    static void Main()
     {
         Personaje p1 = new Barbaro("Dave", 30, 8, 10);
         Personaje p2 = new Sacerdote("Samson", 30, 7);
@@ -167,12 +166,15 @@ class Juego
         }
     }
 
+
     public static Personaje Batalla(Personaje p1, Personaje p2)
     {
         Console.WriteLine($"\n--- INICIO: {p1.GetNombre()} vs {p2.GetNombre()} ---");
-
+        int contadorRonda=0;
         while (p1.EstaVivo() && p2.EstaVivo())
         {
+            contadorRonda=contadorRonda+1;
+            Console.WriteLine($"------Ronda No {contadorRonda}--------------");
             int d1 = p1.CalcularDanio();
             int d2 = p2.CalcularDanio();
 
@@ -181,7 +183,6 @@ class Juego
 
             if (p1 is Musashi m1) m1.AplicarHabilidad(p2);
             if (p2 is Musashi m2) m2.AplicarHabilidad(p1);
-            Console.WriteLine("--------------------");
         }
 
         if (p1.EstaVivo()) return p1;
