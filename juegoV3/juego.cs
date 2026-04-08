@@ -76,12 +76,13 @@ class Personaje
 // ===================== SUBCLASES =====================
 class Sacerdote : Personaje
 {
-    private static Random random = new Random();
+    //private static Random random = new Random();
+    
     public Sacerdote(string n, int v, int a) : base(n, v, a) { }
 
     public override void RecibirDanio(int danio)
     {
-        if (random.Next(1, 5) == 1)
+        if (Random.Shared.Next(1, 5) == 1) //rando.shared es una forma más moderna de generar números aleatorios en C#
         {
             Console.WriteLine($"¡Las plegarias de {GetNombre()} reducen el daño a la mitad!");
             danio /= 2;
@@ -140,7 +141,7 @@ class Juego
 {
     static void Main()
     {
-        Personaje p1 = new Barbaro("Dave", 30, 8, 10);
+        Personaje p1 = new Barbaro("Dave", 30, 8, 11);
         Personaje p2 = new Sacerdote("Samson", 30, 7);
 
         p1.Equipar(new Arma(3));
@@ -151,7 +152,7 @@ class Juego
         if (ganador != null)
         {
             Console.WriteLine($"\n--- {ganador.GetNombre()} avanza a la Final ---");
-            Personaje musashi = new Musashi("Musashi", 20, 5);
+            Personaje musashi = new Musashi("Musashi", 10, 5);
             musashi.Equipar(new Arma(2));
 
             Personaje ganadorFinal = Batalla(musashi, ganador);
