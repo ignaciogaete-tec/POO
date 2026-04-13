@@ -77,7 +77,7 @@ class Personaje
 class Sacerdote : Personaje
 {
     //private static Random random = new Random();
-    
+
     public Sacerdote(string n, int v, int a) : base(n, v, a) { }
 
     public override void RecibirDanio(int danio)
@@ -141,17 +141,39 @@ class Juego
 {
     static void Main()
     {
+        //primera pelea
+
+        Personaje ganador = null;
+        bool primerIntento = true;
+
+        while(ganador == null)
+        {
+            if (!primerIntento)
+            {
+                Console.WriteLine("La batalla se repite ya que no hubo ningún ganador");
+            }
+
+        primerIntento = false;
+
         Personaje p1 = new Barbaro("Dave", 30, 8, 11);
         Personaje p2 = new Sacerdote("Samson", 30, 7);
 
         p1.Equipar(new Arma(3));
         p2.Equipar(new Armadura(2));
 
-        Personaje ganador = Batalla(p1, p2);
+        ganador = Batalla(p1, p2);
 
-        if (ganador != null)
-        {
+        
+
+
+        }
+        //hasta aca 
+
+        //segunda
+        
+        
             Console.WriteLine($"\n--- {ganador.GetNombre()} avanza a la Final ---");
+
             Personaje musashi = new Musashi("Musashi", 10, 5);
             musashi.Equipar(new Arma(2));
 
@@ -160,24 +182,22 @@ class Juego
                 Console.WriteLine($"\nEL CAMPEÓN ES: {ganadorFinal.GetNombre()}");
             else
                 Console.WriteLine("\nLa final terminó en un empate trágico.");
-        }
-        else
-        {
-            Console.WriteLine("\nAmbos murieron. Musashi no tiene oponente.");
-        }
+        
+        
     }
+    //hasta acá
 
 
     public static Personaje Batalla(Personaje p1, Personaje p2)
     {
         Console.WriteLine($"\n--- INICIO: {p1.GetNombre()} VS {p2.GetNombre()} ---");
-        int contadorRonda=0;
+        int contadorRonda = 0;
         while (p1.EstaVivo() && p2.EstaVivo())
         {
-            contadorRonda=contadorRonda+1;
+            contadorRonda = contadorRonda + 1;
             Console.WriteLine($"------Ronda No {contadorRonda}--------------");
             Console.WriteLine($"{p1.GetNombre()} Y {p2.GetNombre()} Luchan ..");
-            
+
             int d1 = p1.CalcularDanio();
             int d2 = p2.CalcularDanio();
 
